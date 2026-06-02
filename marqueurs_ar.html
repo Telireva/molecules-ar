@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Marqueurs AR — À imprimer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap');
+
+    body {
+      font-family: 'Sora', Arial, sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 20px;
+      color: #111;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 4px;
+      color: #111;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 32px;
+    }
+
+    .markers-grid {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      flex-wrap: wrap;
+    }
+
+    .marker-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 24px;
+      border: 2px solid #e0e0e0;
+      border-radius: 16px;
+      width: 280px;
+    }
+
+    .marker-card img {
+      width: 200px;
+      height: 200px;
+      image-rendering: pixelated;
+      border: 3px solid #000;
+    }
+
+    .mol-label {
+      font-size: 28px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .mol-name {
+      font-size: 14px;
+      color: #555;
+      text-align: center;
+    }
+
+    .mol-data {
+      font-size: 12px;
+      color: #777;
+      text-align: center;
+      line-height: 1.7;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+      width: 100%;
+    }
+
+    .instructions {
+      margin: 40px auto;
+      max-width: 560px;
+      background: #f4f9ff;
+      border: 1.5px solid #c0d8f0;
+      border-radius: 12px;
+      padding: 20px 24px;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #333;
+    }
+
+    .instructions strong { color: #0066cc; }
+
+    @media print {
+      .instructions { display: none; }
+      body { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Marqueurs de Réalité Augmentée</h1>
+<p class="subtitle">Molécules 3D · Chimie Seconde — Imprimer cette page en couleur ou noir & blanc</p>
+
+<div class="markers-grid">
+
+  <!-- MARQUEUR HIRO → H2O -->
+  <div class="marker-card">
+    <!-- Marqueur Hiro standard AR.js - SVG inline -->
+    <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png"
+         alt="Marqueur Hiro - H2O"
+         onerror="this.style.border='3px solid red';this.alt='Image non chargée - connexion requise'">
+    <div class="mol-label">H₂O</div>
+    <div class="mol-name">Eau</div>
+    <div class="mol-data">
+      Atome central : Oxygène (O)<br>
+      2 liaisons O–H<br>
+      Angle H–O–H : <strong>104,5°</strong><br>
+      Géométrie : coudée
+    </div>
+  </div>
+
+  <!-- MARQUEUR KANJI → NH3 -->
+  <div class="marker-card">
+    <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/kanji.png"
+         alt="Marqueur Kanji - NH3"
+         onerror="this.style.border='3px solid red';this.alt='Image non chargée - connexion requise'">
+    <div class="mol-label">NH₃</div>
+    <div class="mol-name">Ammoniac</div>
+    <div class="mol-data">
+      Atome central : Azote (N)<br>
+      3 liaisons N–H<br>
+      Angle H–N–H : <strong>107°</strong><br>
+      Géométrie : pyramidale
+    </div>
+  </div>
+
+</div>
+
+<div class="instructions">
+  <strong>Comment utiliser ces marqueurs :</strong><br>
+  1. Imprimer cette page (A4, noir & blanc suffit)<br>
+  2. Découper les deux marqueurs si besoin<br>
+  3. Ouvrir l'application AR sur ton téléphone ou ta tablette<br>
+  4. Pointer la caméra sur le marqueur Hiro → la molécule <strong>H₂O</strong> apparaît<br>
+  5. Pointer la caméra sur le marqueur Kanji → la molécule <strong>NH₃</strong> apparaît<br><br>
+  ⚠️ <strong>Conseil :</strong> bonne luminosité, marqueur bien à plat, tenir le téléphone à 20–40 cm du marqueur.
+</div>
+
+</body>
+</html>
