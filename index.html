@@ -3,52 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Molécules AR — Seconde</title>
+  <title>Molécules AR</title>
   <style>
     body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
-
     #ui {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 999;
-      background: rgba(0,0,0,0.7);
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      background: rgba(0,0,0,0.7); padding: 10px 16px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-
-    #ui .title { color: #00d4ff; font-weight: bold; font-size: 15px; }
-
-    #ui .badges { display: flex; gap: 8px; font-size: 12px; color: white; }
-
-    #ui .badge {
-      background: rgba(255,255,255,0.15);
-      border-radius: 12px;
-      padding: 4px 10px;
-    }
-
+    .title { color: #00d4ff; font-weight: bold; font-size: 15px; }
+    .badges { display: flex; gap: 8px; font-size: 12px; color: white; }
+    .badge { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 4px 10px; }
     #info {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 999;
-      background: rgba(0,0,0,0.85);
-      border: 1.5px solid #00d4ff;
-      border-radius: 12px;
-      padding: 12px 20px;
-      color: white;
-      text-align: center;
-      display: none;
-      min-width: 220px;
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      z-index: 999; background: rgba(0,0,0,0.85); border: 1.5px solid #00d4ff;
+      border-radius: 12px; padding: 12px 20px; color: white; text-align: center;
+      display: none; min-width: 220px;
     }
-
-    #info .formula { font-size: 20px; font-weight: bold; color: #00d4ff; }
-    #info .data { font-size: 12px; color: rgba(255,255,255,0.7); margin-top:6px; line-height:1.7; }
+    .formula { font-size: 20px; font-weight: bold; color: #00d4ff; }
+    .data { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 6px; line-height: 1.7; }
   </style>
 </head>
-<body>
+<body style="margin: 0; overflow: hidden;">
 
 <div id="ui">
   <div class="title">Molécules AR · Seconde</div>
@@ -66,90 +42,30 @@
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
-<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+<a-scene embedded arjs vr-mode-ui="enabled: false">
 
-  <!-- MARQUEUR HIRO → H2O -->
+  <!-- HIRO → H2O -->
   <a-marker preset="hiro" id="marker-h2o">
-
-    <!-- Oxygène central - rouge -->
-    <a-sphere position="0 0.5 0" radius="0.35" color="#ff3333"
-      material="roughness: 0.3; metalness: 0.1;"
-      animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear;">
-    </a-sphere>
-
-    <!-- H gauche -->
-    <a-sphere position="-0.52 0.2 0" radius="0.18" color="#ffffff"
-      material="roughness: 0.3;">
-    </a-sphere>
-
-    <!-- H droit -->
-    <a-sphere position="0.52 0.2 0" radius="0.18" color="#ffffff"
-      material="roughness: 0.3;">
-    </a-sphere>
-
-    <!-- Liaison O-H gauche -->
-    <a-cylinder position="-0.26 0.35 0" radius="0.04" height="0.45"
-      color="#aabbcc" rotation="0 0 55">
-    </a-cylinder>
-
-    <!-- Liaison O-H droite -->
-    <a-cylinder position="0.26 0.35 0" radius="0.04" height="0.45"
-      color="#aabbcc" rotation="0 0 -55">
-    </a-cylinder>
-
-    <!-- Étiquette -->
-    <a-text value="H2O - Eau" position="0 1.1 0" align="center"
-      color="#00d4ff" scale="0.8 0.8 0.8">
-    </a-text>
-    <a-text value="Angle : 104.5 deg" position="0 0.85 0" align="center"
-      color="white" scale="0.5 0.5 0.5">
-    </a-text>
-
+    <a-sphere position="0 0.5 0" radius="0.35" color="#ff3333"></a-sphere>
+    <a-sphere position="-0.52 0.2 0" radius="0.18" color="#ffffff"></a-sphere>
+    <a-sphere position="0.52 0.2 0" radius="0.18" color="#ffffff"></a-sphere>
+    <a-cylinder position="-0.26 0.35 0" radius="0.04" height="0.45" color="#aabbcc" rotation="0 0 55"></a-cylinder>
+    <a-cylinder position="0.26 0.35 0" radius="0.04" height="0.45" color="#aabbcc" rotation="0 0 -55"></a-cylinder>
+    <a-text value="H2O - Eau" position="0 1.1 0" align="center" color="#00d4ff" scale="0.8 0.8 0.8"></a-text>
+    <a-text value="Angle: 104.5 deg" position="0 0.85 0" align="center" color="white" scale="0.5 0.5 0.5"></a-text>
   </a-marker>
 
-  <!-- MARQUEUR KANJI → NH3 -->
+  <!-- KANJI → NH3 -->
   <a-marker preset="kanji" id="marker-nh3">
-
-    <!-- Azote central - bleu -->
-    <a-sphere position="0 0.5 0" radius="0.32" color="#3366ff"
-      material="roughness: 0.3; metalness: 0.1;"
-      animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear;">
-    </a-sphere>
-
-    <!-- H1 devant -->
-    <a-sphere position="0 0.1 0.55" radius="0.18" color="#ffffff"
-      material="roughness: 0.3;">
-    </a-sphere>
-
-    <!-- H2 arrière gauche -->
-    <a-sphere position="-0.48 0.1 -0.27" radius="0.18" color="#ffffff"
-      material="roughness: 0.3;">
-    </a-sphere>
-
-    <!-- H3 arrière droit -->
-    <a-sphere position="0.48 0.1 -0.27" radius="0.18" color="#ffffff"
-      material="roughness: 0.3;">
-    </a-sphere>
-
-    <!-- Liaisons N-H -->
-    <a-cylinder position="0 0.3 0.275" radius="0.04" height="0.5"
-      color="#aabbcc" rotation="72 0 0">
-    </a-cylinder>
-    <a-cylinder position="-0.24 0.3 -0.135" radius="0.04" height="0.5"
-      color="#aabbcc" rotation="72 120 0">
-    </a-cylinder>
-    <a-cylinder position="0.24 0.3 -0.135" radius="0.04" height="0.5"
-      color="#aabbcc" rotation="72 240 0">
-    </a-cylinder>
-
-    <!-- Étiquette -->
-    <a-text value="NH3 - Ammoniac" position="0 1.1 0" align="center"
-      color="#00d4ff" scale="0.8 0.8 0.8">
-    </a-text>
-    <a-text value="Angle : 107 deg - Pyramidale" position="0 0.85 0" align="center"
-      color="white" scale="0.5 0.5 0.5">
-    </a-text>
-
+    <a-sphere position="0 0.5 0" radius="0.32" color="#3366ff"></a-sphere>
+    <a-sphere position="0 0.1 0.55" radius="0.18" color="#ffffff"></a-sphere>
+    <a-sphere position="-0.48 0.1 -0.27" radius="0.18" color="#ffffff"></a-sphere>
+    <a-sphere position="0.48 0.1 -0.27" radius="0.18" color="#ffffff"></a-sphere>
+    <a-cylinder position="0 0.3 0.275" radius="0.04" height="0.5" color="#aabbcc" rotation="72 0 0"></a-cylinder>
+    <a-cylinder position="-0.24 0.3 -0.135" radius="0.04" height="0.5" color="#aabbcc" rotation="72 120 0"></a-cylinder>
+    <a-cylinder position="0.24 0.3 -0.135" radius="0.04" height="0.5" color="#aabbcc" rotation="72 240 0"></a-cylinder>
+    <a-text value="NH3 - Ammoniac" position="0 1.1 0" align="center" color="#00d4ff" scale="0.8 0.8 0.8"></a-text>
+    <a-text value="Angle: 107 deg" position="0 0.85 0" align="center" color="white" scale="0.5 0.5 0.5"></a-text>
   </a-marker>
 
   <a-entity camera></a-entity>
@@ -157,32 +73,17 @@
 
 <script>
 const INFO = {
-  h2o: {
-    formula: 'H₂O — Eau',
-    data: 'Atome central : Oxygène (O)\n2 liaisons O–H\nAngle H–O–H : 104,5°\nGéométrie : coudée'
-  },
-  nh3: {
-    formula: 'NH₃ — Ammoniac',
-    data: 'Atome central : Azote (N)\n3 liaisons N–H\nAngle H–N–H : 107°\nGéométrie : pyramidale'
-  }
+  h2o: { formula: 'H₂O — Eau', data: 'Atome central : Oxygène\n2 liaisons O–H\nAngle : 104,5°\nGéométrie : coudée' },
+  nh3: { formula: 'NH₃ — Ammoniac', data: 'Atome central : Azote\n3 liaisons N–H\nAngle : 107°\nGéométrie : pyramidale' }
 };
-
-let hideTimer = null;
-
 function showInfo(key) {
-  const d = INFO[key];
-  document.getElementById('info-formula').textContent = d.formula;
-  document.getElementById('info-data').textContent = d.data;
+  document.getElementById('info-formula').textContent = INFO[key].formula;
+  document.getElementById('info-data').textContent = INFO[key].data;
   document.getElementById('info').style.display = 'block';
-  if (hideTimer) clearTimeout(hideTimer);
 }
-
 function hideInfo() {
-  hideTimer = setTimeout(() => {
-    document.getElementById('info').style.display = 'none';
-  }, 2000);
+  setTimeout(() => { document.getElementById('info').style.display = 'none'; }, 2000);
 }
-
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('marker-h2o').addEventListener('markerFound', () => showInfo('h2o'));
   document.getElementById('marker-h2o').addEventListener('markerLost', hideInfo);
