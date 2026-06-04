@@ -4,270 +4,256 @@
 <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
 <script>
-// Composant bond : cylindre parfait entre deux points
-AFRAME.registerComponent('bond', {
-  schema: {
-    start:  {type:'vec3',   default:{x:0,y:0,z:0}},
-    end:    {type:'vec3',   default:{x:0,y:1,z:0}},
-    radius: {type:'number', default:0.04},
-    color:  {type:'color',  default:'#ccddee'},
-    order:  {type:'number', default:1}  // 1=simple, 2=double, 3=triple
-  },
-  init: function() {
-    var d = this.data;
-    var A = new THREE.Vector3(d.start.x, d.start.y, d.start.z);
-    var B = new THREE.Vector3(d.end.x,   d.end.y,   d.end.z);
-    var len = A.distanceTo(B);
-    var dir = new THREE.Vector3().subVectors(B, A).normalize();
-    var mid = new THREE.Vector3().addVectors(A, B).multiplyScalar(0.5);
-    var mat = new THREE.MeshStandardMaterial({color:d.color, roughness:0.3, metalness:0.1});
-    var ax  = new THREE.Vector3(0,1,0);
+// Crée un mesh cylindre entre deux points A et B
+function makeBond(scene, ax, ay, az, bx, by, bz, radius, color, order) {
+  var A = new THREE.Vector3(ax, ay, az);
+  var B = new THREE.Vector3(bx, by, bz);
+  var dir = new THREE.Vector3().subVectors(B, A).normalize();
+  var len = A.distanceTo(B);
+  var mid = new THREE.Vector3().addVectors(A, B).multiplyScalar(0.5);
+  var yAxis = new THREE.Vector3(0, 1, 0);
 
-    if (d.order === 1) {
-      var geo  = new THREE.CylinderGeometry(d.radius, d.radius, len, 16);
-      var mesh = new THREE.Mesh(geo, mat);
-      mesh.position.copy(mid);
-      mesh.quaternion.setFromUnitVectors(ax, dir);
-      this.el.object3D.add(mesh);
-    } else {
-      // Calcul perpendiculaire robuste
-      var ref = (Math.abs(dir.dot(new THREE.Vector3(0,1,0))) > 0.9)
-        ? new THREE.Vector3(1,0,0)
-        : new THREE.Vector3(0,1,0);
-      var perp = new THREE.Vector3().crossVectors(dir, ref).normalize();
-      var offsets = d.order === 2 ? [-0.055, 0.055] : [-0.075, 0, 0.075];
-      offsets.forEach(function(off) {
-        var geo2  = new THREE.CylinderGeometry(d.radius*0.7, d.radius*0.7, len, 12);
-        var mesh2 = new THREE.Mesh(geo2, mat.clone());
-        var pos   = mid.clone().addScaledVector(perp, off);
-        mesh2.position.copy(pos);
-        mesh2.quaternion.setFromUnitVectors(ax, dir);
-        this.el.object3D.add(mesh2);
-      }, this);
-    }
-  }
-});
+  // Perpendiculaire robuste
+  var ref = (Math.abs(dir.dot(yAxis)) > 0.9)
+    ? new THREE.Vector3(1, 0, 0)
+    : new THREE.Vector3(0, 1, 0);
+  var perp = new THREE.Vector3().crossVectors(dir, ref).normalize();
+
+  var offsets = order === 1 ? [0] : (order === 2 ? [-0.055, 0.055] : [-0.075, 0, 0.075]);
+  var r = order === 1 ? radius : radius * 0.7;
+
+  offsets.forEach(function(off) {
+    var geo  = new THREE.CylinderGeometry(r, r, len, 16);
+    var mat  = new THREE.MeshStandardMaterial({color: color, roughness: 0.3, metalness: 0.1});
+    var mesh = new THREE.Mesh(geo, mat);
+    var pos  = mid.clone().addScaledVector(perp, off);
+    mesh.position.copy(pos);
+    mesh.quaternion.setFromUnitVectors(yAxis, dir);
+    scene.object3D.add(mesh);
+  });
+}
 
 // Données des molécules
 var MOLECULES = {
   h2o: {
     name: 'H₂O — Eau',
-    info: 'Angle H-O-H : 104,5° | Géométrie : coudée | Polaire',
+    info: 'Angle H-O-H : 104,5° | Coudée | Polaire',
     atoms: [
-      {pos:'0 0.6 0',    r:0.28, color:'#ff2200'}, // O
-      {pos:'-0.514 0.202 0', r:0.18, color:'#eeeeee'}, // H
-      {pos:'0.514 0.202 0',  r:0.18, color:'#eeeeee'}  // H
+      [0, 0.6, 0,         0.28, '#ff2200'],
+      [-0.514, 0.202, 0,  0.18, '#eeeeee'],
+      [0.514, 0.202, 0,   0.18, '#eeeeee']
     ],
     bonds: [
-      {s:'0 0.6 0', e:'-0.514 0.202 0', o:1},
-      {s:'0 0.6 0', e:'0.514 0.202 0',  o:1}
+      [0,0.6,0,  -0.514,0.202,0, 1],
+      [0,0.6,0,   0.514,0.202,0, 1]
     ]
   },
   nh3: {
     name: 'NH₃ — Ammoniac',
-    info: 'Angle H-N-H : 107° | Géométrie : pyramidale | Polaire',
+    info: 'Angle H-N-H : 107° | Pyramidale | Polaire',
     atoms: [
-      {pos:'0 0.55 0',         r:0.25, color:'#2255ff'},
-      {pos:'0.557 0.327 0',    r:0.18, color:'#eeeeee'},
-      {pos:'-0.278 0.327 0.482',  r:0.18, color:'#eeeeee'},
-      {pos:'-0.278 0.327 -0.482', r:0.18, color:'#eeeeee'}
+      [0, 0.55, 0,          0.25, '#2255ff'],
+      [0.557, 0.327, 0,     0.18, '#eeeeee'],
+      [-0.278, 0.327, 0.482,  0.18, '#eeeeee'],
+      [-0.278, 0.327, -0.482, 0.18, '#eeeeee']
     ],
     bonds: [
-      {s:'0 0.55 0', e:'0.557 0.327 0',     o:1},
-      {s:'0 0.55 0', e:'-0.278 0.327 0.482',  o:1},
-      {s:'0 0.55 0', e:'-0.278 0.327 -0.482', o:1}
+      [0,0.55,0, 0.557,0.327,0,     1],
+      [0,0.55,0, -0.278,0.327,0.482,  1],
+      [0,0.55,0, -0.278,0.327,-0.482, 1]
     ]
   },
   ch4: {
     name: 'CH₄ — Méthane',
-    info: 'Angle H-C-H : 109,5° | Géométrie : tétraédrique | Apolaire',
+    info: 'Angle H-C-H : 109,5° | Tétraédrique | Apolaire',
     atoms: [
-      {pos:'0 0.5 0',             r:0.25, color:'#555555'},
-      {pos:'0 1.05 0',            r:0.18, color:'#eeeeee'},
-      {pos:'0.519 0.317 0',       r:0.18, color:'#eeeeee'},
-      {pos:'-0.259 0.317 0.449',  r:0.18, color:'#eeeeee'},
-      {pos:'-0.259 0.317 -0.449', r:0.18, color:'#eeeeee'}
+      [0, 0.5, 0,              0.25, '#555555'],
+      [0, 1.05, 0,             0.18, '#eeeeee'],
+      [0.519, 0.317, 0,        0.18, '#eeeeee'],
+      [-0.259, 0.317, 0.449,   0.18, '#eeeeee'],
+      [-0.259, 0.317, -0.449,  0.18, '#eeeeee']
     ],
     bonds: [
-      {s:'0 0.5 0', e:'0 1.05 0',            o:1},
-      {s:'0 0.5 0', e:'0.519 0.317 0',       o:1},
-      {s:'0 0.5 0', e:'-0.259 0.317 0.449',  o:1},
-      {s:'0 0.5 0', e:'-0.259 0.317 -0.449', o:1}
+      [0,0.5,0, 0,1.05,0,           1],
+      [0,0.5,0, 0.519,0.317,0,      1],
+      [0,0.5,0, -0.259,0.317,0.449, 1],
+      [0,0.5,0, -0.259,0.317,-0.449,1]
     ]
   },
   c2h6: {
     name: 'C₂H₆ — Éthane',
     info: 'Liaison C-C simple | sp3 | Apolaire',
     atoms: [
-      {pos:'-0.325 0.5 0', r:0.25, color:'#555555'},
-      {pos:'0.325 0.5 0',  r:0.25, color:'#555555'},
-      {pos:'-0.492 0.971 0',    r:0.16, color:'#eeeeee'},
-      {pos:'-0.492 0.264 0.408',r:0.16, color:'#eeeeee'},
-      {pos:'-0.492 0.264 -0.408',r:0.16,color:'#eeeeee'},
-      {pos:'0.492 0.736 0.408', r:0.16, color:'#eeeeee'},
-      {pos:'0.492 0.029 0',     r:0.16, color:'#eeeeee'},
-      {pos:'0.492 0.736 -0.408',r:0.16, color:'#eeeeee'}
+      [-0.325, 0.5, 0,      0.25, '#555555'],
+      [0.325, 0.5, 0,       0.25, '#555555'],
+      [-0.492, 0.971, 0,    0.16, '#eeeeee'],
+      [-0.492, 0.264, 0.408,  0.16, '#eeeeee'],
+      [-0.492, 0.264, -0.408, 0.16, '#eeeeee'],
+      [0.492, 0.736, 0.408,   0.16, '#eeeeee'],
+      [0.492, 0.029, 0,       0.16, '#eeeeee'],
+      [0.492, 0.736, -0.408,  0.16, '#eeeeee']
     ],
     bonds: [
-      {s:'-0.325 0.5 0', e:'0.325 0.5 0',  o:1},
-      {s:'-0.325 0.5 0', e:'-0.492 0.971 0',    o:1},
-      {s:'-0.325 0.5 0', e:'-0.492 0.264 0.408', o:1},
-      {s:'-0.325 0.5 0', e:'-0.492 0.264 -0.408',o:1},
-      {s:'0.325 0.5 0',  e:'0.492 0.736 0.408',  o:1},
-      {s:'0.325 0.5 0',  e:'0.492 0.029 0',      o:1},
-      {s:'0.325 0.5 0',  e:'0.492 0.736 -0.408', o:1}
+      [-0.325,0.5,0, 0.325,0.5,0,          1],
+      [-0.325,0.5,0, -0.492,0.971,0,       1],
+      [-0.325,0.5,0, -0.492,0.264,0.408,   1],
+      [-0.325,0.5,0, -0.492,0.264,-0.408,  1],
+      [0.325,0.5,0,  0.492,0.736,0.408,    1],
+      [0.325,0.5,0,  0.492,0.029,0,        1],
+      [0.325,0.5,0,  0.492,0.736,-0.408,   1]
     ]
   },
   c2h4: {
     name: 'C₂H₄ — Éthylène',
     info: 'Liaison C=C double | sp2 | Plan | Apolaire',
     atoms: [
-      {pos:'-0.3 0.5 0', r:0.25, color:'#555555'},
-      {pos:'0.3 0.5 0',  r:0.25, color:'#555555'},
-      {pos:'-0.06 0.916 0',  r:0.16, color:'#eeeeee'},
-      {pos:'-0.06 0.084 0',  r:0.16, color:'#eeeeee'},
-      {pos:'0.54 0.916 0',   r:0.16, color:'#eeeeee'},
-      {pos:'0.54 0.084 0',   r:0.16, color:'#eeeeee'}
+      [-0.3, 0.5, 0,   0.25, '#555555'],
+      [0.3, 0.5, 0,    0.25, '#555555'],
+      [-0.06, 0.916, 0, 0.16, '#eeeeee'],
+      [-0.06, 0.084, 0, 0.16, '#eeeeee'],
+      [0.54, 0.916, 0,  0.16, '#eeeeee'],
+      [0.54, 0.084, 0,  0.16, '#eeeeee']
     ],
     bonds: [
-      {s:'-0.3 0.5 0', e:'0.3 0.5 0',   o:2},
-      {s:'-0.3 0.5 0', e:'-0.06 0.916 0', o:1},
-      {s:'-0.3 0.5 0', e:'-0.06 0.084 0', o:1},
-      {s:'0.3 0.5 0',  e:'0.54 0.916 0',  o:1},
-      {s:'0.3 0.5 0',  e:'0.54 0.084 0',  o:1}
+      [-0.3,0.5,0, 0.3,0.5,0,      2],
+      [-0.3,0.5,0, -0.06,0.916,0,  1],
+      [-0.3,0.5,0, -0.06,0.084,0,  1],
+      [0.3,0.5,0,  0.54,0.916,0,   1],
+      [0.3,0.5,0,  0.54,0.084,0,   1]
     ]
   },
   c2h2: {
     name: 'C₂H₂ — Acétylène (éthyne)',
     info: 'Liaison C≡C triple | sp | Linéaire | Apolaire',
     atoms: [
-      {pos:'-0.275 0.5 0', r:0.25, color:'#555555'},
-      {pos:'0.275 0.5 0',  r:0.25, color:'#555555'},
-      {pos:'-0.725 0.5 0', r:0.16, color:'#eeeeee'},
-      {pos:'0.725 0.5 0',  r:0.16, color:'#eeeeee'}
+      [-0.275, 0.5, 0,  0.25, '#555555'],
+      [0.275, 0.5, 0,   0.25, '#555555'],
+      [-0.725, 0.5, 0,  0.16, '#eeeeee'],
+      [0.725, 0.5, 0,   0.16, '#eeeeee']
     ],
     bonds: [
-      {s:'-0.275 0.5 0', e:'0.275 0.5 0',  o:3},
-      {s:'-0.275 0.5 0', e:'-0.725 0.5 0', o:1},
-      {s:'0.275 0.5 0',  e:'0.725 0.5 0',  o:1}
+      [-0.275,0.5,0, 0.275,0.5,0,  3],
+      [-0.275,0.5,0, -0.725,0.5,0, 1],
+      [0.275,0.5,0,  0.725,0.5,0,  1]
     ]
   },
   ch3oh: {
     name: 'CH₃OH — Méthanol',
     info: 'Alcool | Groupe -OH | Polaire',
     atoms: [
-      {pos:'-0.25 0.5 0',  r:0.25, color:'#555555'}, // C
-      {pos:'0.25 0.5 0',   r:0.28, color:'#ff2200'},  // O
-      {pos:'0.117 0.877 0',r:0.16, color:'#eeeeee'},  // H-O
-      {pos:'-0.41 0.953 0',    r:0.16, color:'#eeeeee'},
-      {pos:'-0.41 0.274 0.392',r:0.16, color:'#eeeeee'},
-      {pos:'-0.41 0.274 -0.392',r:0.16,color:'#eeeeee'}
+      [-0.25, 0.5, 0,   0.25, '#555555'],
+      [0.25, 0.5, 0,    0.28, '#ff2200'],
+      [0.117, 0.877, 0, 0.16, '#eeeeee'],
+      [-0.41, 0.953, 0,     0.16, '#eeeeee'],
+      [-0.41, 0.274, 0.392, 0.16, '#eeeeee'],
+      [-0.41, 0.274,-0.392, 0.16, '#eeeeee']
     ],
     bonds: [
-      {s:'-0.25 0.5 0', e:'0.25 0.5 0',    o:1},
-      {s:'0.25 0.5 0',  e:'0.117 0.877 0', o:1},
-      {s:'-0.25 0.5 0', e:'-0.41 0.953 0',     o:1},
-      {s:'-0.25 0.5 0', e:'-0.41 0.274 0.392',  o:1},
-      {s:'-0.25 0.5 0', e:'-0.41 0.274 -0.392', o:1}
+      [-0.25,0.5,0, 0.25,0.5,0,       1],
+      [0.25,0.5,0,  0.117,0.877,0,    1],
+      [-0.25,0.5,0, -0.41,0.953,0,    1],
+      [-0.25,0.5,0, -0.41,0.274,0.392, 1],
+      [-0.25,0.5,0, -0.41,0.274,-0.392,1]
     ]
   },
   hcho: {
-    name: 'HCHO — Méthanal (formaldéhyde)',
+    name: 'HCHO — Méthanal',
     info: 'Aldéhyde | Liaison C=O | sp2 | Plan | Polaire',
     atoms: [
-      {pos:'0 0.5 0',    r:0.25, color:'#555555'}, // C
-      {pos:'0 0.85 0',   r:0.28, color:'#ff2200'}, // O
-      {pos:'-0.39 0.275 0', r:0.16, color:'#eeeeee'},
-      {pos:'0.39 0.275 0',  r:0.16, color:'#eeeeee'}
+      [0, 0.5, 0,    0.25, '#555555'],
+      [0, 0.88, 0,   0.28, '#ff2200'],
+      [-0.42, 0.25, 0, 0.16, '#eeeeee'],
+      [0.42, 0.25, 0,  0.16, '#eeeeee']
     ],
     bonds: [
-      {s:'0 0.5 0', e:'0 0.85 0',    o:2},
-      {s:'0 0.5 0', e:'-0.39 0.275 0', o:1},
-      {s:'0 0.5 0', e:'0.39 0.275 0',  o:1}
+      [0,0.5,0, 0,0.88,0,      2],
+      [0,0.5,0, -0.42,0.25,0,  1],
+      [0,0.5,0,  0.42,0.25,0,  1]
     ]
   },
   ch3nh2: {
     name: 'CH₃NH₂ — Méthanamine',
     info: 'Amine | Groupe -NH₂ | Pyramidal | Polaire',
     atoms: [
-      {pos:'-0.25 0.5 0', r:0.25, color:'#555555'}, // C
-      {pos:'0.30 0.5 0',  r:0.25, color:'#2255ff'}, // N
-      {pos:'-0.41 0.953 0',     r:0.16, color:'#eeeeee'},
-      {pos:'-0.41 0.274 0.392', r:0.16, color:'#eeeeee'},
-      {pos:'-0.41 0.274 -0.392',r:0.16, color:'#eeeeee'},
-      {pos:'0.469 0.709 0.361', r:0.16, color:'#eeeeee'},
-      {pos:'0.469 0.083 0',     r:0.16, color:'#eeeeee'}
+      [-0.25, 0.5, 0,  0.25, '#555555'],
+      [0.30, 0.5, 0,   0.25, '#2255ff'],
+      [-0.41, 0.953, 0,     0.16, '#eeeeee'],
+      [-0.41, 0.274, 0.392, 0.16, '#eeeeee'],
+      [-0.41, 0.274,-0.392, 0.16, '#eeeeee'],
+      [0.469, 0.709, 0.361, 0.16, '#eeeeee'],
+      [0.469, 0.083, 0,     0.16, '#eeeeee']
     ],
     bonds: [
-      {s:'-0.25 0.5 0', e:'0.30 0.5 0',          o:1},
-      {s:'-0.25 0.5 0', e:'-0.41 0.953 0',        o:1},
-      {s:'-0.25 0.5 0', e:'-0.41 0.274 0.392',    o:1},
-      {s:'-0.25 0.5 0', e:'-0.41 0.274 -0.392',   o:1},
-      {s:'0.30 0.5 0',  e:'0.469 0.709 0.361',    o:1},
-      {s:'0.30 0.5 0',  e:'0.469 0.083 0',        o:1}
+      [-0.25,0.5,0, 0.30,0.5,0,          1],
+      [-0.25,0.5,0, -0.41,0.953,0,       1],
+      [-0.25,0.5,0, -0.41,0.274,0.392,   1],
+      [-0.25,0.5,0, -0.41,0.274,-0.392,  1],
+      [0.30,0.5,0,  0.469,0.709,0.361,   1],
+      [0.30,0.5,0,  0.469,0.083,0,       1]
     ]
   }
 };
 
-var currentMol = 'h2o';
 var markerEl = null;
 
 function buildMolecule(key) {
   if (!markerEl) return;
-  // Vider le marqueur
-  while (markerEl.firstChild) markerEl.removeChild(markerEl.firstChild);
-
   var mol = MOLECULES[key];
   if (!mol) return;
 
-  // Liaisons en premier (sous les sphères)
+  // Vider le marqueur de tous ses enfants
+  while (markerEl.firstChild) markerEl.removeChild(markerEl.firstChild);
+  // Vider aussi les meshes Three.js directs
+  var obj = markerEl.object3D;
+  while (obj.children.length > 0) obj.remove(obj.children[0]);
+
+  // Liaisons via Three.js direct (AVANT les sphères)
   mol.bonds.forEach(function(b) {
-    var el = document.createElement('a-entity');
-    el.setAttribute('bond', 'start:'+b.s+'; end:'+b.e+'; radius:0.04; color:#bbccdd; order:'+b.o);
-    markerEl.appendChild(el);
+    makeBond(markerEl, b[0],b[1],b[2], b[3],b[4],b[5], 0.04, '#bbccdd', b[6]);
   });
 
-  // Atomes par dessus
+  // Atomes via a-sphere (PAR DESSUS les liaisons)
   mol.atoms.forEach(function(a) {
     var el = document.createElement('a-sphere');
-    el.setAttribute('position', a.pos);
-    el.setAttribute('radius', a.r);
-    el.setAttribute('material', 'color:'+a.color+'; roughness:0.15; metalness:0.05; shader:standard;');
+    el.setAttribute('position', a[0]+' '+a[1]+' '+a[2]);
+    el.setAttribute('radius', a[3]);
+    el.setAttribute('material', 'color:'+a[4]+'; roughness:0.15; metalness:0.05; shader:standard;');
     markerEl.appendChild(el);
   });
 
-  // Étiquette
-  var label = document.createElement('a-text');
-  label.setAttribute('value', mol.name);
-  label.setAttribute('position', '0 1.3 0');
-  label.setAttribute('align', 'center');
-  label.setAttribute('color', '#00d4ff');
-  label.setAttribute('scale', '0.7 0.7 0.7');
-  markerEl.appendChild(label);
+  // Labels
+  var lbl = document.createElement('a-text');
+  lbl.setAttribute('value', mol.name);
+  lbl.setAttribute('position', '0 1.3 0');
+  lbl.setAttribute('align', 'center');
+  lbl.setAttribute('color', '#00d4ff');
+  lbl.setAttribute('scale', '0.7 0.7 0.7');
+  markerEl.appendChild(lbl);
 
-  var info = document.createElement('a-text');
-  info.setAttribute('value', mol.info);
-  info.setAttribute('position', '0 1.05 0');
-  info.setAttribute('align', 'center');
-  info.setAttribute('color', '#ffffff');
-  info.setAttribute('scale', '0.38 0.38 0.38');
-  markerEl.appendChild(info);
+  var inf = document.createElement('a-text');
+  inf.setAttribute('value', mol.info);
+  inf.setAttribute('position', '0 1.08 0');
+  inf.setAttribute('align', 'center');
+  inf.setAttribute('color', '#ffffff');
+  inf.setAttribute('scale', '0.38 0.38 0.38');
+  markerEl.appendChild(inf);
 
-  // Mettre à jour UI
+  // UI
   document.getElementById('mol-title').textContent = mol.name;
   document.getElementById('mol-info').textContent  = mol.info;
-  currentMol = key;
 
-  // Highlight bouton actif
   document.querySelectorAll('.mol-btn').forEach(function(btn) {
-    btn.style.background = btn.dataset.mol === key ? 'rgba(0,212,255,0.3)' : 'rgba(0,0,0,0.5)';
-    btn.style.borderColor = btn.dataset.mol === key ? '#00d4ff' : 'rgba(255,255,255,0.2)';
+    btn.style.background   = btn.dataset.mol === key ? 'rgba(0,212,255,0.3)' : 'rgba(0,0,0,0.5)';
+    btn.style.borderColor  = btn.dataset.mol === key ? '#00d4ff' : 'rgba(255,255,255,0.2)';
   });
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-  markerEl = document.getElementById('main-marker');
-  buildMolecule('h2o');
+  var scene = document.querySelector('a-scene');
+  scene.addEventListener('loaded', function() {
+    markerEl = document.getElementById('main-marker');
+    buildMolecule('h2o');
+  });
 
   document.querySelectorAll('.mol-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -295,7 +281,7 @@ body { overflow:hidden; font-family:Arial,sans-serif; }
   padding:20px 8px 10px;
 }
 
-.mol-group { margin-bottom:6px; }
+.mol-group  { margin-bottom:6px; }
 .group-label {
   color:rgba(255,255,255,0.5); font-size:9px;
   letter-spacing:1px; text-transform:uppercase;
@@ -312,20 +298,16 @@ body { overflow:hidden; font-family:Arial,sans-serif; }
   transition:all 0.15s;
   white-space:nowrap;
 }
-.mol-btn:active { transform:scale(0.95); }
 </style>
 
 <body style="margin:0; overflow:hidden;">
 
-<!-- UI haut -->
 <div id="ui-top">
   <div id="mol-title">H₂O — Eau</div>
-  <div id="mol-info">Angle H-O-H : 104,5° | Géométrie : coudée | Polaire</div>
+  <div id="mol-info">Angle H-O-H : 104,5° | Coudée | Polaire</div>
 </div>
 
-<!-- UI bas - sélecteur de molécules -->
 <div id="ui-bottom">
-
   <div class="mol-group">
     <div class="group-label">Inorganiques</div>
     <div class="btn-row">
@@ -333,7 +315,6 @@ body { overflow:hidden; font-family:Arial,sans-serif; }
       <button class="mol-btn" data-mol="nh3">NH₃</button>
     </div>
   </div>
-
   <div class="mol-group">
     <div class="group-label">Alcanes / Alcènes / Alcynes</div>
     <div class="btn-row">
@@ -343,7 +324,6 @@ body { overflow:hidden; font-family:Arial,sans-serif; }
       <button class="mol-btn" data-mol="c2h2">C₂H₂</button>
     </div>
   </div>
-
   <div class="mol-group">
     <div class="group-label">Fonctions organiques</div>
     <div class="btn-row">
@@ -352,18 +332,18 @@ body { overflow:hidden; font-family:Arial,sans-serif; }
       <button class="mol-btn" data-mol="ch3nh2">CH₃NH₂</button>
     </div>
   </div>
-
 </div>
 
-<!-- Scène AR -->
-<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" renderer="colorManagement:true; physicallyCorrectLights:true;" vr-mode-ui="enabled:false" device-orientation-permission-ui="enabled:false">
+<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;"
+  renderer="colorManagement:true; physicallyCorrectLights:true;"
+  vr-mode-ui="enabled:false"
+  device-orientation-permission-ui="enabled:false">
 
   <a-light type="ambient"     color="#ffffff" intensity="0.5"></a-light>
   <a-light type="directional" color="#ffffff" intensity="1.2" position="1 2 1"></a-light>
   <a-light type="point"       color="#aaddff" intensity="0.5" position="-1 1 0"></a-light>
 
   <a-marker preset="hiro" id="main-marker"></a-marker>
-
   <a-entity camera></a-entity>
 </a-scene>
 
