@@ -7,125 +7,127 @@
 <a-scene embedded arjs renderer="colorManagement: true; physicallyCorrectLights: true;">
 
   <!-- Éclairage réaliste -->
-  <a-light type="ambient" color="#ffffff" intensity="0.4"></a-light>
+  <a-light type="ambient" color="#ffffff" intensity="0.5"></a-light>
   <a-light type="directional" color="#ffffff" intensity="1.2" position="1 2 1"></a-light>
-  <a-light type="point" color="#aaddff" intensity="0.6" position="-1 1 0"></a-light>
+  <a-light type="point" color="#aaddff" intensity="0.5" position="-1 1 0"></a-light>
 
   <!-- ═══════════════════════════════
        HIRO → H2O
+       O = (0, 0.6, 0)
+       H gauche = (-0.514, 0.202, 0)
+       H droit  = ( 0.514, 0.202, 0)
        Angle H-O-H = 104.5°
-       O au centre, 2 H à ±52.25° de l'axe Y
   ═══════════════════════════════ -->
   <a-marker preset="hiro">
 
-    <!-- Oxygène central - rouge CPK -->
+    <!-- Oxygène rouge -->
     <a-sphere position="0 0.6 0" radius="0.38"
       material="color:#ff2200; roughness:0.15; metalness:0.05; shader:standard;">
     </a-sphere>
 
-    <!-- H gauche: angle 52.25° à gauche de l'axe vertical -->
-    <!-- distance O-H = 0.65 unités -->
-    <!-- x = 0.65 * sin(52.25°) = 0.514, y = 0.65 * cos(52.25°) = 0.397 -->
-    <a-sphere position="-0.514 0.203 0" radius="0.22"
-      material="color:#ffffff; roughness:0.1; metalness:0.05; shader:standard;">
+    <!-- H gauche -->
+    <a-sphere position="-0.514 0.202 0" radius="0.22"
+      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
     </a-sphere>
 
     <!-- H droit -->
-    <a-sphere position="0.514 0.203 0" radius="0.22"
-      material="color:#ffffff; roughness:0.1; metalness:0.05; shader:standard;">
+    <a-sphere position="0.514 0.202 0" radius="0.22"
+      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
     </a-sphere>
 
-    <!-- Liaison O-H gauche -->
-    <!-- milieu entre O(0, 0.6, 0) et H(-0.514, 0.203, 0) -->
-    <!-- milieu: (-0.257, 0.4015, 0), longueur: 0.65, angle: 52.25° -->
-    <a-cylinder position="-0.257 0.4015 0" radius="0.055" height="0.65"
-      material="color:#ccddee; roughness:0.3; shader:standard;"
+    <!-- Liaison O-H gauche
+         milieu = (-0.257, 0.401, 0)
+         vecteur O->H = (-0.514, -0.398, 0)
+         angle avec Y = 52.25° → rotation Z = +52.25
+    -->
+    <a-cylinder position="-0.257 0.401 0"
+      radius="0.05" height="0.65"
+      material="color:#ccddee; roughness:0.25; shader:standard;"
       rotation="0 0 52.25">
     </a-cylinder>
 
-    <!-- Liaison O-H droite -->
-    <a-cylinder position="0.257 0.4015 0" radius="0.055" height="0.65"
-      material="color:#ccddee; roughness:0.3; shader:standard;"
+    <!-- Liaison O-H droite
+         milieu = (0.257, 0.401, 0)
+         angle avec Y = 52.25° → rotation Z = -52.25
+    -->
+    <a-cylinder position="0.257 0.401 0"
+      radius="0.05" height="0.65"
+      material="color:#ccddee; roughness:0.25; shader:standard;"
       rotation="0 0 -52.25">
     </a-cylinder>
 
-    <!-- Label -->
     <a-text value="H2O — Eau" position="0 1.25 0" align="center"
-      color="#00d4ff" scale="0.75 0.75 0.75">
-    </a-text>
+      color="#00d4ff" scale="0.75 0.75 0.75"></a-text>
     <a-text value="Angle H-O-H : 104.5 deg" position="0 1.0 0" align="center"
-      color="#ffffff" scale="0.5 0.5 0.5">
-    </a-text>
+      color="#ffffff" scale="0.5 0.5 0.5"></a-text>
 
   </a-marker>
 
   <!-- ═══════════════════════════════
        KANJI → NH3
+       N  = (0,     0.55,  0)
+       H1 = (0.557, 0.327, 0)
+       H2 = (-0.278, 0.327, 0.482)
+       H3 = (-0.278, 0.327,-0.482)
+       theta = 68.158° (angle N-H / vertical)
        Angle H-N-H = 107°
-       Géométrie pyramidale trigonale
-       N au sommet, 3 H à la base
-       demi-angle au sommet = 107/2 = 53.5°
-       distance N-H = 0.6 unités
   ═══════════════════════════════ -->
   <a-marker preset="kanji">
 
-    <!-- Azote central - bleu CPK -->
+    <!-- Azote bleu -->
     <a-sphere position="0 0.55 0" radius="0.35"
       material="color:#2255ff; roughness:0.15; metalness:0.05; shader:standard;">
     </a-sphere>
 
-    <!-- Positions H pyramidales:
-         angle N-H par rapport à vertical = 53.5°
-         distance N-H = 0.6
-         dx = 0.6 * sin(53.5°) = 0.482
-         dy = 0.6 * cos(53.5°) = 0.356
-         les 3 H sont à 120° l'un de l'autre autour de Y
-         H1: azimut 0°   → x=0.482,  z=0
-         H2: azimut 120° → x=-0.241, z=0.418
-         H3: azimut 240° → x=-0.241, z=-0.418
+    <!-- H1 -->
+    <a-sphere position="0.557 0.327 0" radius="0.22"
+      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
+    </a-sphere>
+
+    <!-- H2 -->
+    <a-sphere position="-0.278 0.327 0.482" radius="0.22"
+      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
+    </a-sphere>
+
+    <!-- H3 -->
+    <a-sphere position="-0.278 0.327 -0.482" radius="0.22"
+      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
+    </a-sphere>
+
+    <!-- Liaison N-H1
+         milieu=(0.278, 0.438, 0)
+         rotation: angle_tilt=111.8° autour Z, puis 90° autour Y
     -->
-
-    <!-- H1 devant -->
-    <a-sphere position="0.482 0.194 0" radius="0.22"
-      material="color:#ffffff; roughness:0.1; metalness:0.05; shader:standard;">
-    </a-sphere>
-
-    <!-- H2 arrière gauche -->
-    <a-sphere position="-0.241 0.194 0.418" radius="0.22"
-      material="color:#ffffff; roughness:0.1; metalness:0.05; shader:standard;">
-    </a-sphere>
-
-    <!-- H3 arrière droit -->
-    <a-sphere position="-0.241 0.194 -0.418" radius="0.22"
-      material="color:#ffffff; roughness:0.1; metalness:0.05; shader:standard;">
-    </a-sphere>
-
-    <!-- Liaisons N-H: milieu entre N et chaque H -->
-    <!-- N=(0,0.55,0), H1=(0.482,0.194,0) → milieu=(0.241,0.372,0), L=0.6 -->
-    <a-cylinder position="0.241 0.372 0" radius="0.05" height="0.6"
-      material="color:#ccddee; roughness:0.3; shader:standard;"
-      rotation="0 0 -53.5">
+    <a-cylinder position="0.278 0.438 0"
+      radius="0.05" height="0.6"
+      material="color:#ccddee; roughness:0.25; shader:standard;"
+      rotation="0 90 111.8">
     </a-cylinder>
 
-    <!-- N=(0,0.55,0), H2=(-0.241,0.194,0.418) → milieu=(-0.1205,0.372,0.209) -->
-    <a-cylinder position="-0.1205 0.372 0.209" radius="0.05" height="0.6"
-      material="color:#ccddee; roughness:0.3; shader:standard;"
-      rotation="53.5 60 0">
+    <!-- Liaison N-H2
+         milieu=(-0.139, 0.438, 0.241)
+         rotation: angle_tilt=111.8°, azimut=-30°
+    -->
+    <a-cylinder position="-0.139 0.438 0.241"
+      radius="0.05" height="0.6"
+      material="color:#ccddee; roughness:0.25; shader:standard;"
+      rotation="0 -30 111.8">
     </a-cylinder>
 
-    <!-- N=(0,0.55,0), H3=(-0.241,0.194,-0.418) → milieu=(-0.1205,0.372,-0.209) -->
-    <a-cylinder position="-0.1205 0.372 -0.209" radius="0.05" height="0.6"
-      material="color:#ccddee; roughness:0.3; shader:standard;"
-      rotation="53.5 -60 0">
+    <!-- Liaison N-H3
+         milieu=(-0.139, 0.438,-0.241)
+         rotation: angle_tilt=111.8°, azimut=-150°
+    -->
+    <a-cylinder position="-0.139 0.438 -0.241"
+      radius="0.05" height="0.6"
+      material="color:#ccddee; roughness:0.25; shader:standard;"
+      rotation="0 -150 111.8">
     </a-cylinder>
 
-    <!-- Label -->
     <a-text value="NH3 — Ammoniac" position="0 1.2 0" align="center"
-      color="#00d4ff" scale="0.75 0.75 0.75">
-    </a-text>
+      color="#00d4ff" scale="0.75 0.75 0.75"></a-text>
     <a-text value="Angle H-N-H : 107 deg" position="0 0.95 0" align="center"
-      color="#ffffff" scale="0.5 0.5 0.5">
-    </a-text>
+      color="#ffffff" scale="0.5 0.5 0.5"></a-text>
 
   </a-marker>
 
