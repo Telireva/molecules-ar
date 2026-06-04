@@ -30,10 +30,12 @@ AFRAME.registerComponent('bond', {
       mesh.quaternion.setFromUnitVectors(ax, dir);
       this.el.object3D.add(mesh);
     } else {
-      // Double ou triple : plusieurs cylindres décalés
-      var perp = new THREE.Vector3(dir.y, -dir.x, 0).normalize();
-      if (perp.length() < 0.01) perp.set(0, dir.z, -dir.y).normalize();
-      var offsets = d.order === 2 ? [-0.05, 0.05] : [-0.07, 0, 0.07];
+      // Calcul perpendiculaire robuste
+      var ref = (Math.abs(dir.dot(new THREE.Vector3(0,1,0))) > 0.9)
+        ? new THREE.Vector3(1,0,0)
+        : new THREE.Vector3(0,1,0);
+      var perp = new THREE.Vector3().crossVectors(dir, ref).normalize();
+      var offsets = d.order === 2 ? [-0.055, 0.055] : [-0.075, 0, 0.075];
       offsets.forEach(function(off) {
         var geo2  = new THREE.CylinderGeometry(d.radius*0.7, d.radius*0.7, len, 12);
         var mesh2 = new THREE.Mesh(geo2, mat.clone());
