@@ -2,25 +2,66 @@
 <html>
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+<script>
+// Composant qui oriente automatiquement un cylindre entre deux points A et B
+AFRAME.registerComponent('bond', {
+  schema: {
+    start: {type: 'vec3', default: {x:0, y:0, z:0}},
+    end:   {type: 'vec3', default: {x:0, y:1, z:0}},
+    radius:{type: 'number', default: 0.05},
+    color: {type: 'color', default: '#ccddee'}
+  },
+  init: function() {
+    var data = this.data;
+    var A = new THREE.Vector3(data.start.x, data.start.y, data.start.z);
+    var B = new THREE.Vector3(data.end.x,   data.end.y,   data.end.z);
+
+    // Longueur
+    var len = A.distanceTo(B);
+
+    // Point milieu
+    var mid = new THREE.Vector3().addVectors(A, B).multiplyScalar(0.5);
+
+    // Direction
+    var dir = new THREE.Vector3().subVectors(B, A).normalize();
+
+    // Créer le cylindre
+    var geo = new THREE.CylinderGeometry(data.radius, data.radius, len, 16);
+    var mat = new THREE.MeshStandardMaterial({
+      color: data.color,
+      roughness: 0.25,
+      metalness: 0.1
+    });
+    var mesh = new THREE.Mesh(geo, mat);
+
+    // Positionner au milieu
+    mesh.position.copy(mid);
+
+    // Orienter dans la direction A->B
+    // Le cylindre par défaut est aligné sur Y
+    var axis = new THREE.Vector3(0, 1, 0);
+    mesh.quaternion.setFromUnitVectors(axis, dir);
+
+    this.el.object3D.add(mesh);
+  }
+});
+</script>
+
 <body style="margin: 0px; overflow: hidden;">
 
 <a-scene embedded arjs renderer="colorManagement: true; physicallyCorrectLights: true;">
 
-  <!-- Éclairage réaliste -->
   <a-light type="ambient" color="#ffffff" intensity="0.5"></a-light>
   <a-light type="directional" color="#ffffff" intensity="1.2" position="1 2 1"></a-light>
   <a-light type="point" color="#aaddff" intensity="0.5" position="-1 1 0"></a-light>
 
-  <!-- ═══════════════════════════════
+  <!-- ═══════════════════
        HIRO → H2O
-       O = (0, 0.6, 0)
-       H gauche = (-0.514, 0.202, 0)
-       H droit  = ( 0.514, 0.202, 0)
-       Angle H-O-H = 104.5°
-  ═══════════════════════════════ -->
+  ═══════════════════ -->
   <a-marker preset="hiro">
 
-    <!-- Oxygène rouge -->
+    <!-- Oxygène -->
     <a-sphere position="0 0.6 0" radius="0.38"
       material="color:#ff2200; roughness:0.15; metalness:0.05; shader:standard;">
     </a-sphere>
@@ -35,26 +76,9 @@
       material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
     </a-sphere>
 
-    <!-- Liaison O-H gauche
-         milieu = (-0.257, 0.401, 0)
-         vecteur O->H = (-0.514, -0.398, 0)
-         angle avec Y = 52.25° → rotation Z = +52.25
-    -->
-    <a-cylinder position="-0.257 0.401 0"
-      radius="0.05" height="0.65"
-      material="color:#ccddee; roughness:0.25; shader:standard;"
-      rotation="0 0 52.25">
-    </a-cylinder>
-
-    <!-- Liaison O-H droite
-         milieu = (0.257, 0.401, 0)
-         angle avec Y = 52.25° → rotation Z = -52.25
-    -->
-    <a-cylinder position="0.257 0.401 0"
-      radius="0.05" height="0.65"
-      material="color:#ccddee; roughness:0.25; shader:standard;"
-      rotation="0 0 -52.25">
-    </a-cylinder>
+    <!-- Liaisons via composant bond -->
+    <a-entity bond="start:0 0.6 0; end:-0.514 0.202 0; radius:0.05; color:#ccddee"></a-entity>
+    <a-entity bond="start:0 0.6 0; end:0.514 0.202 0; radius:0.05; color:#ccddee"></a-entity>
 
     <a-text value="H2O — Eau" position="0 1.25 0" align="center"
       color="#00d4ff" scale="0.75 0.75 0.75"></a-text>
@@ -63,18 +87,12 @@
 
   </a-marker>
 
-  <!-- ═══════════════════════════════
+  <!-- ═══════════════════
        KANJI → NH3
-       N  = (0,     0.55,  0)
-       H1 = (0.557, 0.327, 0)
-       H2 = (-0.278, 0.327, 0.482)
-       H3 = (-0.278, 0.327,-0.482)
-       theta = 68.158° (angle N-H / vertical)
-       Angle H-N-H = 107°
-  ═══════════════════════════════ -->
+  ═══════════════════ -->
   <a-marker preset="kanji">
 
-    <!-- Azote bleu -->
+    <!-- Azote -->
     <a-sphere position="0 0.55 0" radius="0.35"
       material="color:#2255ff; roughness:0.15; metalness:0.05; shader:standard;">
     </a-sphere>
@@ -94,35 +112,10 @@
       material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
     </a-sphere>
 
-    <!-- Liaison N-H1
-         milieu=(0.278, 0.438, 0)
-         rotation: angle_tilt=111.8° autour Z, puis 90° autour Y
-    -->
-    <a-cylinder position="0.278 0.438 0"
-      radius="0.05" height="0.6"
-      material="color:#ccddee; roughness:0.25; shader:standard;"
-      rotation="0 90 111.8">
-    </a-cylinder>
-
-    <!-- Liaison N-H2
-         milieu=(-0.139, 0.438, 0.241)
-         rotation: angle_tilt=111.8°, azimut=-30°
-    -->
-    <a-cylinder position="-0.139 0.438 0.241"
-      radius="0.05" height="0.6"
-      material="color:#ccddee; roughness:0.25; shader:standard;"
-      rotation="0 -30 111.8">
-    </a-cylinder>
-
-    <!-- Liaison N-H3
-         milieu=(-0.139, 0.438,-0.241)
-         rotation: angle_tilt=111.8°, azimut=-150°
-    -->
-    <a-cylinder position="-0.139 0.438 -0.241"
-      radius="0.05" height="0.6"
-      material="color:#ccddee; roughness:0.25; shader:standard;"
-      rotation="0 -150 111.8">
-    </a-cylinder>
+    <!-- Liaisons via composant bond -->
+    <a-entity bond="start:0 0.55 0; end:0.557 0.327 0; radius:0.05; color:#ccddee"></a-entity>
+    <a-entity bond="start:0 0.55 0; end:-0.278 0.327 0.482; radius:0.05; color:#ccddee"></a-entity>
+    <a-entity bond="start:0 0.55 0; end:-0.278 0.327 -0.482; radius:0.05; color:#ccddee"></a-entity>
 
     <a-text value="NH3 — Ammoniac" position="0 1.2 0" align="center"
       color="#00d4ff" scale="0.75 0.75 0.75"></a-text>
