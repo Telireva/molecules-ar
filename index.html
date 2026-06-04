@@ -4,128 +4,78 @@
 <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
 <script>
-// Composant qui oriente automatiquement un cylindre entre deux points A et B
 AFRAME.registerComponent('bond', {
   schema: {
     start: {type: 'vec3', default: {x:0, y:0, z:0}},
     end:   {type: 'vec3', default: {x:0, y:1, z:0}},
-    radius:{type: 'number', default: 0.05},
+    radius:{type: 'number', default: 0.04},
     color: {type: 'color', default: '#ccddee'}
   },
   init: function() {
-    var data = this.data;
-    var A = new THREE.Vector3(data.start.x, data.start.y, data.start.z);
-    var B = new THREE.Vector3(data.end.x,   data.end.y,   data.end.z);
-
-    // Longueur
+    var d = this.data;
+    var A = new THREE.Vector3(d.start.x, d.start.y, d.start.z);
+    var B = new THREE.Vector3(d.end.x,   d.end.y,   d.end.z);
     var len = A.distanceTo(B);
-
-    // Point milieu
     var mid = new THREE.Vector3().addVectors(A, B).multiplyScalar(0.5);
-
-    // Direction
     var dir = new THREE.Vector3().subVectors(B, A).normalize();
-
-    // Créer le cylindre
-    var geo = new THREE.CylinderGeometry(data.radius, data.radius, len, 16);
-    var mat = new THREE.MeshStandardMaterial({
-      color: data.color,
-      roughness: 0.25,
-      metalness: 0.1
-    });
+    var geo = new THREE.CylinderGeometry(d.radius, d.radius, len, 16);
+    var mat = new THREE.MeshStandardMaterial({color: d.color, roughness:0.3, metalness:0.1});
     var mesh = new THREE.Mesh(geo, mat);
-
-    // Positionner au milieu
     mesh.position.copy(mid);
-
-    // Orienter dans la direction A->B
-    // Le cylindre par défaut est aligné sur Y
-    var axis = new THREE.Vector3(0, 1, 0);
-    mesh.quaternion.setFromUnitVectors(axis, dir);
-
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
     this.el.object3D.add(mesh);
   }
 });
 </script>
 
 <body style="margin: 0px; overflow: hidden;">
-
 <a-scene embedded arjs renderer="colorManagement: true; physicallyCorrectLights: true;">
 
   <a-light type="ambient" color="#ffffff" intensity="0.5"></a-light>
   <a-light type="directional" color="#ffffff" intensity="1.2" position="1 2 1"></a-light>
   <a-light type="point" color="#aaddff" intensity="0.5" position="-1 1 0"></a-light>
 
-  <!-- ═══════════════════
-       HIRO → H2O
-  ═══════════════════ -->
+  <!-- HIRO → H2O
+       Représentation boules-bâtons : sphères plus petites
+       O = (0, 0.6, 0), rayon 0.22
+       H = (±0.514, 0.202, 0), rayon 0.15
+  -->
   <a-marker preset="hiro">
-
-    <!-- Oxygène -->
-    <a-sphere position="0 0.6 0" radius="0.38"
-      material="color:#ff2200; roughness:0.15; metalness:0.05; shader:standard;">
-    </a-sphere>
-
-    <!-- H gauche -->
-    <a-sphere position="-0.514 0.202 0" radius="0.22"
-      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
-    </a-sphere>
-
-    <!-- H droit -->
-    <a-sphere position="0.514 0.202 0" radius="0.22"
-      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
-    </a-sphere>
-
-    <!-- Liaisons via composant bond -->
-    <a-entity bond="start:0 0.6 0; end:-0.514 0.202 0; radius:0.05; color:#ccddee"></a-entity>
-    <a-entity bond="start:0 0.6 0; end:0.514 0.202 0; radius:0.05; color:#ccddee"></a-entity>
-
-    <a-text value="H2O — Eau" position="0 1.25 0" align="center"
-      color="#00d4ff" scale="0.75 0.75 0.75"></a-text>
-    <a-text value="Angle H-O-H : 104.5 deg" position="0 1.0 0" align="center"
-      color="#ffffff" scale="0.5 0.5 0.5"></a-text>
-
+    <a-sphere position="0 0.6 0" radius="0.22"
+      material="color:#ff2200; roughness:0.15; metalness:0.05; shader:standard;"></a-sphere>
+    <a-sphere position="-0.514 0.202 0" radius="0.15"
+      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;"></a-sphere>
+    <a-sphere position="0.514 0.202 0" radius="0.15"
+      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;"></a-sphere>
+    <a-entity bond="start:0 0.6 0; end:-0.514 0.202 0; radius:0.04; color:#ccddee"></a-entity>
+    <a-entity bond="start:0 0.6 0; end:0.514 0.202 0; radius:0.04; color:#ccddee"></a-entity>
+    <a-text value="H2O — Eau" position="0 1.1 0" align="center" color="#00d4ff" scale="0.7 0.7 0.7"></a-text>
+    <a-text value="Angle H-O-H : 104.5 deg" position="0 0.9 0" align="center" color="#ffffff" scale="0.45 0.45 0.45"></a-text>
   </a-marker>
 
-  <!-- ═══════════════════
-       KANJI → NH3
-  ═══════════════════ -->
+  <!-- KANJI → NH3
+       N = (0, 0.55, 0), rayon 0.20
+       H1 = (0.557, 0.327, 0)
+       H2 = (-0.278, 0.327, 0.482)
+       H3 = (-0.278, 0.327,-0.482), rayon 0.15
+  -->
   <a-marker preset="kanji">
-
-    <!-- Azote -->
-    <a-sphere position="0 0.55 0" radius="0.35"
-      material="color:#2255ff; roughness:0.15; metalness:0.05; shader:standard;">
-    </a-sphere>
-
-    <!-- H1 -->
-    <a-sphere position="0.557 0.327 0" radius="0.22"
-      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
-    </a-sphere>
-
-    <!-- H2 -->
-    <a-sphere position="-0.278 0.327 0.482" radius="0.22"
-      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
-    </a-sphere>
-
-    <!-- H3 -->
-    <a-sphere position="-0.278 0.327 -0.482" radius="0.22"
-      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;">
-    </a-sphere>
-
-    <!-- Liaisons via composant bond -->
-    <a-entity bond="start:0 0.55 0; end:0.557 0.327 0; radius:0.05; color:#ccddee"></a-entity>
-    <a-entity bond="start:0 0.55 0; end:-0.278 0.327 0.482; radius:0.05; color:#ccddee"></a-entity>
-    <a-entity bond="start:0 0.55 0; end:-0.278 0.327 -0.482; radius:0.05; color:#ccddee"></a-entity>
-
-    <a-text value="NH3 — Ammoniac" position="0 1.2 0" align="center"
-      color="#00d4ff" scale="0.75 0.75 0.75"></a-text>
-    <a-text value="Angle H-N-H : 107 deg" position="0 0.95 0" align="center"
-      color="#ffffff" scale="0.5 0.5 0.5"></a-text>
-
+    <a-sphere position="0 0.55 0" radius="0.20"
+      material="color:#2255ff; roughness:0.15; metalness:0.05; shader:standard;"></a-sphere>
+    <a-sphere position="0.557 0.327 0" radius="0.15"
+      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;"></a-sphere>
+    <a-sphere position="-0.278 0.327 0.482" radius="0.15"
+      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;"></a-sphere>
+    <a-sphere position="-0.278 0.327 -0.482" radius="0.15"
+      material="color:#eeeeee; roughness:0.1; metalness:0.05; shader:standard;"></a-sphere>
+    <a-entity bond="start:0 0.55 0; end:0.557 0.327 0; radius:0.04; color:#ccddee"></a-entity>
+    <a-entity bond="start:0 0.55 0; end:-0.278 0.327 0.482; radius:0.04; color:#ccddee"></a-entity>
+    <a-entity bond="start:0 0.55 0; end:-0.278 0.327 -0.482; radius:0.04; color:#ccddee"></a-entity>
+    <a-text value="NH3 — Ammoniac" position="0 1.1 0" align="center" color="#00d4ff" scale="0.7 0.7 0.7"></a-text>
+    <a-text value="Angle H-N-H : 107 deg" position="0 0.9 0" align="center" color="#ffffff" scale="0.45 0.45 0.45"></a-text>
   </a-marker>
 
   <a-entity camera></a-entity>
 </a-scene>
-
 </body>
 </html>
